@@ -255,7 +255,7 @@ export default function ChapterQuestions() {
       {zoom && <ImageZoomModal src={zoom.src} alt={zoom.alt} onClose={() => setZoom(null)} />}
       {showSim && (subjectId === "chemistry"
         ? <FreeContentModal onClose={() => setShowSim(false)} />
-        : <SimilarityModal groups={simGroups} chapterName={chapterName} markLabel={markLabel} onClose={() => setShowSim(false)} />
+        : <SimilarityModal groups={simGroups} chapterName={chapterName} markLabel={markLabel} hideAnswer={subjectId === "physics" && mark === "numeric"} onClose={() => setShowSim(false)} />
       )}
     </div>
   );

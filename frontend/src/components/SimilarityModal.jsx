@@ -9,7 +9,7 @@ const DIFF_COLORS = {
 };
 
 // Full-screen (mobile-first) overlay listing questions grouped by "similarity".
-export default function SimilarityModal({ groups, chapterName, markLabel, onClose }) {
+export default function SimilarityModal({ groups, chapterName, markLabel, hideAnswer = false, onClose }) {
   const [open, setOpen] = React.useState({}); // { key: bool } -> answer revealed
   const [gi, setGi] = React.useState(0); // current similar-group index
   const bodyRef = React.useRef(null);
@@ -101,7 +101,7 @@ export default function SimilarityModal({ groups, chapterName, markLabel, onClos
                             <ChevronDown className={`h-3.5 w-3.5 transition-transform ${open[key] ? "rotate-180" : ""}`} />
                             {open[key] ? "Hide Answer" : "View Answer"}
                           </button>
-                          {open[key] && (
+                          {open[key] && !hideAnswer && (
                             <div className="mt-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5">
                               <p className="mb-1 text-[10px] font-black uppercase tracking-wide text-amber-700">Answer</p>
                               <MathText value={q.answer} className="text-[12px] leading-relaxed text-slate-800" />
