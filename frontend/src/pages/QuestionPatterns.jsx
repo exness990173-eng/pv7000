@@ -118,25 +118,25 @@ const PHYSICS_CHAPTERS = {
   "3m": [
     { q: 29, label: "Electric Charges & Fields" },
     { q: 30, label: "Electrostatic Potential & Capacitance" },
-    { q: 31, label: "Moving Charges & Magnetism" },
-    { q: 32, label: "Magnetism & Matter" },
-    { q: 33, label: "Electromagnetic Induction" },
-    { q: 34, label: "Ray Optics and Optical Instruments" },
-    { q: 35, label: "Dual Nature of Radiation" },
-    { q: 36, label: "Nuclei" },
+    { q: 31, label: "Moving Charges & Magnetism", locked: true },
+    { q: 32, label: "Magnetism & Matter", locked: true },
+    { q: 33, label: "Electromagnetic Induction", locked: true },
+    { q: 34, label: "Ray Optics and Optical Instruments", locked: true },
+    { q: 35, label: "Dual Nature of Radiation", locked: true },
+    { q: 36, label: "Nuclei", locked: true },
   ],
   "5m": [
     { q: 37, options: ["Electric Charges & Fields", "Electrostatic Potential & Capacitance"] },
-    { q: 38, label: "Current Electricity" },
-    { q: 39, label: "Moving Charges & Magnetism" },
-    { q: 40, options: ["Ray Optics", "Wave Optics"] },
-    { q: 41, label: "Semiconductor Electronics" },
+    { q: 38, label: "Current Electricity", locked: true },
+    { q: 39, label: "Moving Charges & Magnetism", locked: true },
+    { q: 40, options: ["Ray Optics", "Wave Optics"], locked: true },
+    { q: 41, label: "Semiconductor Electronics", locked: true },
   ],
   "numeric": [
     { q: 42, options: ["Electric Charges & Fields", "Electrostatic Potential & Capacitance"] },
-    { q: 43, label: "Current Electricity" },
-    { q: 44, label: "Alternating Current" },
-    { q: 45, options: ["Ray Optics", "Wave Optics"] },
+    { q: 43, label: "Current Electricity", locked: true },
+    { q: 44, label: "Alternating Current", locked: true },
+    { q: 45, options: ["Ray Optics", "Wave Optics"], locked: true },
   ],
 };
 
@@ -255,6 +255,7 @@ export default function QuestionPatterns() {
   const rangeGroups = isMcqFbk && RANGE_GROUPS[subjectId]
     ? RANGE_GROUPS[subjectId].map((r, idx) => ({
         key: r.key, label: r.label, note: r.note, hideCount: true,
+        locked: subjectId === "physics" && idx > 0,
         openChapter: idx === 0 ? rangeTarget : undefined,
         match: (q) => { const n = CHAPTER_NO[q.chapter] || 0; return n >= r.min && n <= r.max; },
       }))
@@ -387,7 +388,7 @@ export default function QuestionPatterns() {
               {groups.map((g, gi) => {
                 const active = selectedKey === g.key;
                 const count = g.count != null ? g.count : questions.filter(g.match).length;
-                const gLocked = trialSubject && groupFreeCount != null && gi >= groupFreeCount;
+                const gLocked = g.locked || (trialSubject && groupFreeCount != null && gi >= groupFreeCount);
                 if (gLocked) {
                   return (
                     <div
