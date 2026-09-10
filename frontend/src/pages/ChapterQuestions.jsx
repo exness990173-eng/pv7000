@@ -5,6 +5,7 @@ import { getSubject, chapterImageUrl } from "@/lib/api";
 import { Header } from "@/components/Header";
 import ImageZoomModal from "@/components/ImageZoomModal";
 import SimilarityModal from "@/components/SimilarityModal";
+import FreeContentModal from "@/components/FreeContentModal";
 import { ACCENTS } from "@/lib/theme";
 import { BLUEPRINTS } from "@/lib/blueprints";
 import { resolveChapterBank } from "@/lib/chapterQuestionBanks";
@@ -252,7 +253,10 @@ export default function ChapterQuestions() {
       )}
 
       {zoom && <ImageZoomModal src={zoom.src} alt={zoom.alt} onClose={() => setZoom(null)} />}
-      {showSim && <SimilarityModal groups={simGroups} chapterName={chapterName} markLabel={markLabel} onClose={() => setShowSim(false)} />}
+      {showSim && (subjectId === "chemistry"
+        ? <FreeContentModal onClose={() => setShowSim(false)} />
+        : <SimilarityModal groups={simGroups} chapterName={chapterName} markLabel={markLabel} onClose={() => setShowSim(false)} />
+      )}
     </div>
   );
 }
