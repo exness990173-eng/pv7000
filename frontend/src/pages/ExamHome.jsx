@@ -1,6 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
+import AuthControls from "@/components/AuthControls";
 import { GraduationCap, FlaskConical, Sigma, Atom, Stethoscope, ArrowRight, Clock } from "lucide-react";
 
 const EXAMS = [
@@ -19,6 +20,9 @@ export default function ExamHome() {
       <Header />
 
       <main className="mx-auto max-w-xl px-4 py-10 md:px-6">
+        <div className="mb-6 flex justify-end">
+          <AuthControls />
+        </div>
         <div data-testid="exam-list" className="space-y-4">
           {EXAMS.map((e, i) => {
             const Icon = e.icon;

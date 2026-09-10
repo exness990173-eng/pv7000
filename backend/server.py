@@ -1,15 +1,16 @@
-from fastapi import FastAPI, APIRouter, HTTPException
+from fastapi import FastAPI, APIRouter, HTTPException, Request
 from fastapi.responses import Response
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
+import requests
 from pathlib import Path
 from pydantic import BaseModel, Field
 from typing import List, Optional
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 
 ROOT_DIR = Path(__file__).parent
@@ -649,6 +650,129 @@ async def seed_data():
         docs = [Question(**q).model_dump() for q in SEED_QUESTIONS]
         await db.questions.insert_many(docs)
         logger.info(f"Seeded {len(docs)} physics questions")
+
+
+# ---------------- Auth & Admin (Emergent Google Auth) ----------------
+OWNER_EMAIL = "yxhcvcjjc@gmail.com"
+
+
+async def get_current_user(request: Request):
+    token = request.cookies.get("session_token")
+    if not token:
+        auth = request.headers.get("Authorization", "")
+        if auth.startswith("Bearer "):
+            token = auth[7:]
+    if not token:
+        return None
+    sess = await db.user_sessions.find_one({"session_token": token}, {"_id": 0})
+    if not sess:
+        return None
+    expires_at = sess.get("expires_at")
+    if isinstance(expires_at, str):
+        expires_at = datetime.fromisoformat(expires_at)
+    if expires_at and expires_at.tzinfo is None:
+        expires_at = expires_at.replace(tzinfo=timezone.utc)
+    if expires_at and expires_at < datetime.now(timezone.utc):
+        return None
+    return await db.users.find_one({"user_id": sess["user_id"]}, {"_id": 0})
+
+
+@api_router.post("/auth/session")
+async def auth_session(request: Request, response: Response):
+    session_id = request.headers.get("X-Session-ID")
+    if not session_id:
+        raise HTTPException(status_code=400, detail="Missing X-Session-ID")
+    r = requests.get(
+        "https://demobackend.emergentagent.com/auth/v1/env/oauth/session-data",
+        headers={"X-Session-ID": session_id}, timeout=15,
+    )
+    if r.status_code != 200:
+        raise HTTPException(status_code=401, detail="Invalid session")
+    data = r.json()
+    email = data.get("email")
+    name = data.get("name", "")
+    picture = data.get("picture", "")
+    session_token = data.get("session_token")
+    is_owner = (email == OWNER_EMAIL)
+    existing = await db.users.find_one({"email": email}, {"_id": 0})
+    if existing:
+        updates = {"name": name, "picture": picture}
+        if is_owner:
+            updates["is_owner"] = True
+            updates["access"] = True
+        await db.users.update_one({"email": email}, {"$set": updates})
+    else:
+        user_id = f"user_{uuid.uuid4().hex[:12]}"
+        await db.users.insert_one({
+            "user_id": user_id, "email": email, "name": name, "picture": picture,
+            "phone": "", "access": bool(is_owner), "is_owner": bool(is_owner),
+            "created_at": datetime.now(timezone.utc).isoformat(),
+        })
+    user = await db.users.find_one({"email": email}, {"_id": 0})
+    expires = datetime.now(timezone.utc) + timedelta(days=7)
+    await db.user_sessions.insert_one({
+        "user_id": user["user_id"], "session_token": session_token,
+        "expires_at": expires, "created_at": datetime.now(timezone.utc),
+    })
+    response.set_cookie(key="session_token", value=session_token, httponly=True,
+                        secure=True, samesite="none", path="/", max_age=7 * 24 * 60 * 60)
+    return user
+
+
+@api_router.get("/auth/me")
+async def auth_me(request: Request):
+    user = await get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    return user
+
+
+@api_router.post("/auth/logout")
+async def auth_logout(request: Request, response: Response):
+    token = request.cookies.get("session_token")
+    if not token:
+        auth = request.headers.get("Authorization", "")
+        if auth.startswith("Bearer "):
+            token = auth[7:]
+    if token:
+        await db.user_sessions.delete_one({"session_token": token})
+    response.delete_cookie("session_token", path="/")
+    return {"ok": True}
+
+
+class PhoneBody(BaseModel):
+    phone: str
+
+
+@api_router.post("/user/phone")
+async def save_phone(body: PhoneBody, request: Request):
+    user = await get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    await db.users.update_one({"user_id": user["user_id"]}, {"$set": {"phone": body.phone}})
+    return await db.users.find_one({"user_id": user["user_id"]}, {"_id": 0})
+
+
+@api_router.get("/admin/users")
+async def admin_users(request: Request):
+    user = await get_current_user(request)
+    if not user or user.get("email") != OWNER_EMAIL:
+        raise HTTPException(status_code=403, detail="Forbidden")
+    users = await db.users.find({}, {"_id": 0}).sort("created_at", -1).to_list(2000)
+    return {"count": len(users), "users": users}
+
+
+class AccessBody(BaseModel):
+    access: bool
+
+
+@api_router.patch("/admin/users/{user_id}/access")
+async def set_access(user_id: str, body: AccessBody, request: Request):
+    user = await get_current_user(request)
+    if not user or user.get("email") != OWNER_EMAIL:
+        raise HTTPException(status_code=403, detail="Forbidden")
+    await db.users.update_one({"user_id": user_id}, {"$set": {"access": body.access}})
+    return await db.users.find_one({"user_id": user_id}, {"_id": 0})
 
 
 app.include_router(api_router)

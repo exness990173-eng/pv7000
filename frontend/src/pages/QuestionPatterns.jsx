@@ -6,6 +6,7 @@ import { Header } from "@/components/Header";
 import { QuestionCard } from "@/components/QuestionCard";
 import { SubscriptionPaywall } from "@/components/SubscriptionPaywall";
 import { ACCENTS } from "@/lib/theme";
+import { useAuth } from "@/context/AuthContext";
 import { BLUEPRINTS, MARK_TO_PART } from "@/lib/blueprints";
 import { FileText, BarChart3, ChevronRight, FileQuestion, Lock } from "lucide-react";
 
@@ -188,7 +189,8 @@ export default function QuestionPatterns() {
 
   const [selectedKey, setSelectedKey] = useState(null);
   const [showPaywall, setShowPaywall] = useState(false);
-  const needsSub = ["biology", "cs", "english", "kannada"].includes(subjectId);
+  const { unlocked } = useAuth();
+  const needsSub = !unlocked && ["biology", "cs", "english", "kannada"].includes(subjectId);
   const goSub = (path) => (needsSub ? setShowPaywall(true) : navigate(path));
 
   const { data: subject } = useQuery({
@@ -275,11 +277,11 @@ export default function QuestionPatterns() {
     || (subjectId === "chemistry" && CHEMISTRY_CHAPTERS[activePattern])
     || (isMath6p4 && MATH_CHAPTERS["6p4m"])
     || null;
-  const freeCount = (explicitList && !isMath6p4 && !FULLY_UNLOCKED.includes(subjectId)) ? FREE_COUNT[subjectId]?.[activePattern] : undefined;
-  const trialSubject = TRIAL_SUBJECTS.includes(subjectId) && !FULLY_UNLOCKED.includes(subjectId);
+  const freeCount = (!unlocked && explicitList && !isMath6p4 && !FULLY_UNLOCKED.includes(subjectId)) ? FREE_COUNT[subjectId]?.[activePattern] : undefined;
+  const trialSubject = !unlocked && TRIAL_SUBJECTS.includes(subjectId) && !FULLY_UNLOCKED.includes(subjectId);
   // Generic groups block: MCQ/FBK free only the first group; Maths 2M/3M/5M lock
   // all chapters except the first two; everything else uses the per-pattern count.
-  const groupFreeCount = FULLY_UNLOCKED.includes(subjectId)
+  const groupFreeCount = (unlocked || FULLY_UNLOCKED.includes(subjectId))
     ? undefined
     : (subjectId === "math" && ["2m", "3m", "5m"].includes(activePattern))
       ? 2
@@ -388,7 +390,7 @@ export default function QuestionPatterns() {
               {groups.map((g, gi) => {
                 const active = selectedKey === g.key;
                 const count = g.count != null ? g.count : questions.filter(g.match).length;
-                const gLocked = g.locked || (trialSubject && groupFreeCount != null && gi >= groupFreeCount);
+                const gLocked = !unlocked && (g.locked || (trialSubject && groupFreeCount != null && gi >= groupFreeCount));
                 if (gLocked) {
                   return (
                     <div
@@ -452,7 +454,7 @@ export default function QuestionPatterns() {
           <div className="rounded-r-3xl border-y-2 border-r-2 border-slate-400 py-3 pl-1 pr-16">
             <div className="space-y-2.5">
               {explicitList.map((c, ci) => {
-                const itemLocked = (freeCount != null && ci >= freeCount) || c.locked;
+                const itemLocked = !unlocked && ((freeCount != null && ci >= freeCount) || c.locked);
                 return c.options ? (
                   <div
                     key={c.q}
@@ -464,7 +466,7 @@ export default function QuestionPatterns() {
                       {c.options.map((o, oi) => {
                         const oKey = `${c.q}-${oi}`;
                         const oActive = selectedKey === oKey;
-                        const optLocked = isMath6p4 ? !MATH_6P4_FREE.includes(o) : itemLocked;
+                        const optLocked = !unlocked && (isMath6p4 ? !MATH_6P4_FREE.includes(o) : itemLocked);
                         return (
                           <React.Fragment key={oi}>
                             {oi > 0 && <span className="text-[11px] font-bold uppercase tracking-widest text-slate-400">OR</span>}
