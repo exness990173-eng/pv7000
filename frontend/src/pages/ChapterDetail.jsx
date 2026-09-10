@@ -74,7 +74,7 @@ export default function ChapterDetail() {
               {parts.map((p) => {
                 const c = MARK_COLORS[p.mark] || MARK_COLORS["1"];
                 const goToQuestions = () =>
-                  navigate(`/subject/${subjectId}/questions?type=${p.key}&chapter=${encodeURIComponent(row.chapter)}`);
+                  navigate(`/subject/${subjectId}/questions?type=${p.key}&chapter=${encodeURIComponent(row.chapter)}&back=${encodeURIComponent(`/subject/${subjectId}/chapters/${ch}`)}`);
                 return (
                   <div
                     key={p.key}

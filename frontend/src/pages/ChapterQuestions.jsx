@@ -1,5 +1,5 @@
 import React from "react";
-import { useParams, useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams, useNavigate } from "react-router-dom";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { getSubject, chapterImageUrl } from "@/lib/api";
 import { Header } from "@/components/Header";
@@ -19,7 +19,10 @@ const ICONS = { Atom, FlaskConical, Sigma, Dna, Cpu, BookOpen, Languages, Scroll
 export default function ChapterQuestions() {
   const { subjectId, ch, mark: markParam } = useParams();
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
+
+  const backTo = searchParams.get("back") || "";
 
   // Support both path (/chapters/:ch/q/:mark) and query (?type=&chapter=&q=) forms.
   const mark = markParam || searchParams.get("type") || "";
@@ -81,6 +84,7 @@ export default function ChapterQuestions() {
         subtitle={qno ? `${markLabel} · Q${qno}` : markLabel}
         Icon={Icon}
         bgClass={accent.icon}
+        onBack={(goBack) => (backTo ? navigate(backTo) : goBack())}
         rightSlot={
           <button
             type="button"
@@ -255,7 +259,7 @@ export default function ChapterQuestions() {
       {zoom && <ImageZoomModal src={zoom.src} alt={zoom.alt} onClose={() => setZoom(null)} />}
       {showSim && (subjectId === "chemistry"
         ? <FreeContentModal onClose={() => setShowSim(false)} />
-        : <SimilarityModal groups={simGroups} chapterName={chapterName} markLabel={markLabel} hideAnswer={subjectId === "physics" && mark === "numeric"} onClose={() => setShowSim(false)} />
+        : <SimilarityModal groups={simGroups} chapterName={chapterName} markLabel={markLabel} hideAnswer={subjectId === "physics" && ((/Potential/i.test(chapterName) && ["2m", "3m", "5m", "numeric"].includes(mark)) || (/Electric Charges/i.test(chapterName) && ["3m", "5m", "numeric"].includes(mark)))} onClose={() => setShowSim(false)} />
       )}
     </div>
   );

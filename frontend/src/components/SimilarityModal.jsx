@@ -1,6 +1,7 @@
 import React from "react";
 import { X, Star, Repeat, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { MathText } from "@/components/MathText";
+import FreeContentModal from "@/components/FreeContentModal";
 
 const DIFF_COLORS = {
   easy: "bg-emerald-100 text-emerald-700",
@@ -11,6 +12,7 @@ const DIFF_COLORS = {
 // Full-screen (mobile-first) overlay listing questions grouped by "similarity".
 export default function SimilarityModal({ groups, chapterName, markLabel, hideAnswer = false, onClose }) {
   const [open, setOpen] = React.useState({}); // { key: bool } -> answer revealed
+  const [showFree, setShowFree] = React.useState(false); // locked chapters -> "Free for now" card
   const [gi, setGi] = React.useState(0); // current similar-group index
   const bodyRef = React.useRef(null);
   const total = groups ? groups.length : 0;
@@ -95,11 +97,11 @@ export default function SimilarityModal({ groups, chapterName, markLabel, hideAn
 
                           <button
                             type="button"
-                            onClick={() => setOpen((o) => ({ ...o, [key]: !o[key] }))}
+                            onClick={() => (hideAnswer ? setShowFree(true) : setOpen((o) => ({ ...o, [key]: !o[key] })))}
                             className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-gradient-to-b from-blue-500 to-blue-600 px-3.5 py-1.5 text-[11px] font-bold text-white shadow-sm ring-1 ring-inset ring-white/25 transition hover:from-blue-600 hover:to-blue-700"
                           >
-                            <ChevronDown className={`h-3.5 w-3.5 transition-transform ${open[key] ? "rotate-180" : ""}`} />
-                            {open[key] ? "Hide Answer" : "View Answer"}
+                            <ChevronDown className={`h-3.5 w-3.5 transition-transform ${open[key] && !hideAnswer ? "rotate-180" : ""}`} />
+                            {open[key] && !hideAnswer ? "Hide Answer" : "View Answer"}
                           </button>
                           {open[key] && !hideAnswer && (
                             <div className="mt-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5">
@@ -138,6 +140,7 @@ export default function SimilarityModal({ groups, chapterName, markLabel, hideAn
           </div>
         )}
       </div>
+      {showFree && <FreeContentModal onClose={() => setShowFree(false)} />}
     </div>
   );
 }

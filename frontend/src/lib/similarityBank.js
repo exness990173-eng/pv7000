@@ -944,11 +944,17 @@ const MATRICES_5M_SIMILARITY = [
   },
 ];
 
+// Merge multiple similar-groups into ONE group ("Similar 1") listing every
+// question one-by-one (used for RF 5M and Matrices 5M).
+const mergeToOne = (groups) => [
+  { sim: "Similar 1", items: (groups || []).flatMap((g) => g.items || []) },
+];
+
 export const SIMILARITY_BANK = {
-  "Matrices:5m": MATRICES_5M_SIMILARITY,
-  "Matrices:5M": MATRICES_5M_SIMILARITY,
-  "Relations and Functions:5m": RF_5M_SIMILARITY,
-  "Relations and Functions:5M": RF_5M_SIMILARITY,
+  "Matrices:5m": mergeToOne(MATRICES_5M_SIMILARITY),
+  "Matrices:5M": mergeToOne(MATRICES_5M_SIMILARITY),
+  "Relations and Functions:5m": mergeToOne(RF_5M_SIMILARITY),
+  "Relations and Functions:5M": mergeToOne(RF_5M_SIMILARITY),
   "Electric Charges and Fields:numeric": ECF_NUMERIC,
   "Electric Charges & Fields:numeric": ECF_NUMERIC,
   "Electric Charges and Fields:5m": ECF_5M_THEORY,
