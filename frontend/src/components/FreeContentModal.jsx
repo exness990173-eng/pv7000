@@ -65,7 +65,7 @@ export default function FreeContentModal({ onClose = () => {} }) {
             </div>
             <ul className="space-y-2 pl-9">
               {[
-                { name: "Algebra of Function", mark: "5M" },
+                { name: "Relation and Function", mark: "5M" },
                 { name: "Matrix", mark: "5M" },
                 { name: "Linear Programming", mark: "6M" },
                 { name: "Determinant", mark: "4M" },
