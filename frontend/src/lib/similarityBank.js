@@ -950,9 +950,22 @@ const mergeToOne = (groups) => [
   { sim: "Similar 1", items: (groups || []).flatMap((g) => g.items || []) },
 ];
 
+// Custom Matrices 5M grouping:
+//  - Similar 1: remaining questions (2nd, 3rd, 6th)
+//  - Similar 2: 1st and 4th questions
+//  - Similar 3: 5th question
+const regroupMatrices = (groups) => {
+  const it = (groups || []).flatMap((g) => g.items || []);
+  return [
+    { sim: "Similar 1", items: [it[1], it[2], it[5]].filter(Boolean) },
+    { sim: "Similar 2", items: [it[0], it[3]].filter(Boolean) },
+    { sim: "Similar 3", items: [it[4]].filter(Boolean) },
+  ];
+};
+
 export const SIMILARITY_BANK = {
-  "Matrices:5m": mergeToOne(MATRICES_5M_SIMILARITY),
-  "Matrices:5M": mergeToOne(MATRICES_5M_SIMILARITY),
+  "Matrices:5m": regroupMatrices(MATRICES_5M_SIMILARITY),
+  "Matrices:5M": regroupMatrices(MATRICES_5M_SIMILARITY),
   "Relations and Functions:5m": mergeToOne(RF_5M_SIMILARITY),
   "Relations and Functions:5M": mergeToOne(RF_5M_SIMILARITY),
   "Electric Charges and Fields:numeric": ECF_NUMERIC,
