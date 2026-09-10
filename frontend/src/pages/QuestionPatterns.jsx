@@ -151,13 +151,13 @@ const CHEMISTRY_CHAPTERS = {
   ],
   "3m-inorg": [
     { q: 26, label: "d & f Block Elements" },
-    { q: 27, label: "d & f Block Elements" },
+    { q: 27, label: "d & f Block Elements", locked: true },
     { q: 28, label: "Coordination Compounds" },
     { q: 29, label: "Coordination Compounds" },
     { q: 30, label: "Coordination Compounds" },
   ],
   "3m-phys": [
-    { q: 31, label: "Solutions", locked: true },
+    { q: 31, label: "Solutions" },
     { q: 32, label: "Electrochemistry", locked: true },
     { q: 33, label: "Electrochemistry", locked: true },
     { q: 34, label: "Chemical Kinetics" },
@@ -172,7 +172,7 @@ const CHEMISTRY_CHAPTERS = {
   ],
   "numeric": [
     { q: 41, label: "Solutions" },
-    { q: 42, label: "Solutions" },
+    { q: 42, label: "Solutions", locked: true },
     { q: 43, label: "Electrochemistry" },
     { q: 44, label: "Electrochemistry" },
     { q: 45, label: "Chemical Kinetics" },
