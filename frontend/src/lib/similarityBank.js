@@ -4,6 +4,7 @@
 // Each group: { sim, items: [{ question, difficulty, marks, repetitions, total, answer }] }.
 
 import { DETERMINANTS_SIMILARITY } from "@/lib/determinantsSimilarity";
+import { LINEAR_PROGRAMMING_SIMILARITY } from "@/lib/linearProgrammingSimilarity";
 
 const ECF_NUMERIC = [
   {
@@ -967,6 +968,7 @@ const regroupMatrices = (groups) => {
 
 export const SIMILARITY_BANK = {
   "Determinants:6p4m": DETERMINANTS_SIMILARITY,
+  "Linear Programming:6p4m": LINEAR_PROGRAMMING_SIMILARITY,
   "Matrices:5m": regroupMatrices(MATRICES_5M_SIMILARITY),
   "Matrices:5M": regroupMatrices(MATRICES_5M_SIMILARITY),
   "Relations and Functions:5m": mergeToOne(RF_5M_SIMILARITY),

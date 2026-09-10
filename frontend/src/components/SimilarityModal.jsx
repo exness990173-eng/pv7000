@@ -95,6 +95,7 @@ export default function SimilarityModal({ groups, chapterName, markLabel, hideAn
                             ))}
                           </div>
 
+                          {(q.answer || hideAnswer) && (
                           <button
                             type="button"
                             onClick={() => (hideAnswer ? setShowFree(true) : setOpen((o) => ({ ...o, [key]: !o[key] })))}
@@ -103,6 +104,7 @@ export default function SimilarityModal({ groups, chapterName, markLabel, hideAn
                             <ChevronDown className={`h-3.5 w-3.5 transition-transform ${open[key] && !hideAnswer ? "rotate-180" : ""}`} />
                             {open[key] && !hideAnswer ? "Hide Answer" : "View Answer"}
                           </button>
+                          )}
                           {open[key] && !hideAnswer && (
                             <div className="mt-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5">
                               <p className="mb-1 text-[10px] font-black uppercase tracking-wide text-amber-700">Answer</p>
