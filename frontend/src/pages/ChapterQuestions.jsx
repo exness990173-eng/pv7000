@@ -259,7 +259,7 @@ export default function ChapterQuestions() {
       {zoom && <ImageZoomModal src={zoom.src} alt={zoom.alt} onClose={() => setZoom(null)} />}
       {showSim && ((subjectId === "chemistry" || mark === "mcq" || mark === "fbk" || (subjectId === "math" && (mark === "2m" || mark === "3m")))
         ? <FreeContentModal onClose={() => setShowSim(false)} />
-        : <SimilarityModal groups={simGroups} chapterName={chapterName} markLabel={markLabel} hideAnswer={subjectId === "physics" && ((/Potential/i.test(chapterName) && ["2m", "3m", "5m", "numeric"].includes(mark)) || (/Electric Charges/i.test(chapterName) && ["3m", "5m", "numeric"].includes(mark)))} onClose={() => setShowSim(false)} />
+        : <SimilarityModal groups={simGroups} chapterName={chapterName} markLabel={markLabel} hideAnswer={subjectId === "physics" && !(/electric charges/i.test(chapterName) && String(mark).toLowerCase() === "2m")} onClose={() => setShowSim(false)} />
       )}
     </div>
   );
